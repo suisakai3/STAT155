@@ -1,5 +1,5 @@
 ---
-title: "test"
+title: "this is a test"
 author: "Sui Sakai"
 format: pdf
 editor: visual
@@ -28,7 +28,17 @@ The `echo: false` option disables the printing of code (only output is displayed
 
 # testtest
 
-*this is a [**test**]{.underline}*
+*italic text*
+
+**bold text**
+
+[underlined text]{.underline}
+
+***italic and bold***
+
+[*italic and underlined*]{.underline}
+
+[**bold and underlined**]{.underline}
 
 ## testtest
 
