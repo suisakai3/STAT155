@@ -7,11 +7,11 @@ format: pdf
 
 34 columns x 1100 to 1300 rows
 
-## Data Dictionary
+## Dictionary
 
 **Rank** - Index; irrelevant
 
-**Player** - Name of player
+**Player** - Name of player; \* denotes left-handed, \# denotes switch hitter
 
 **Age** - Age of player
 
