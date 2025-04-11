@@ -1,5 +1,84 @@
 ---
 title: "README"
-format: html
+format: pdf
 ---
 
+## Dimensions
+
+34 columns x 1100 to 1300 rows
+
+## Data Dictionary
+
+**Rank** - Index; irrelevant
+
+**Player** - Name of player
+
+**Age** - Age of player
+
+**Team** - Name of team played for (if multiple, listed as "{x}TM" where x is the number of teams played for)
+
+**Lg** - League; AL/NL
+
+**WAR** - Wins Above Replacement
+
+**G** - Games played
+
+**PA** - Plate Appearances
+
+**AB** - At-Bats
+
+**R** - Runs
+
+**H** - Hits
+
+**2B** - Doubles
+
+**3B** - Triples
+
+**HR** - Home Runs
+
+**RBI** - Runs Batted In
+
+**SB** - Stolen Bases
+
+**CS** - Caught Stealing
+
+**BB** - Base on Balls/Walks
+
+**SO** - Strikeouts
+
+**BA** - Batting Average (Hits/At Bats)
+
+**OBP** - On-Base Percentage (H + BB + HBP)/(At Bats + BB + HBP + SF)
+
+**SLG** - Slugging (1B + 2\*2B + 3\*3B + 4\*HR/At Bats)
+
+**OPS** - On-Base + Slugging Percentage
+
+**OPS+** - 100\*\[OBP/league OBP + SLG/league SLG - 1\], OPS adjusted to player's ballpark
+
+**rOBA** - A measure of a player's offensive contributions, weighted in proportion to each event's actual run value
+
+**Rbat+** - Batting runs as computed for WAR, but indexed to the environment the player played in, where 100 is league average
+
+**TB** - Total Bases (1B + 2\*2B + 3\*3B + 4\*HR)
+
+**GIDP** - Double Plays Grounded Into; only tracks standard double plays
+
+**HBP** - Hit By Pitch
+
+**SH** - Sacrifice Hits (Sacrifice Bunts)
+
+**SF** - Sacrifice Flies
+
+**IBB** - Intentional Bases on Balls
+
+**Pos** - Position(s) Played
+
+**Awards** - Awards won that season
+
+## Source
+
+Baseball Reference - <https://www.baseball-reference.com/>
+
+Data collected from all MLB games in 2000 - 2024
