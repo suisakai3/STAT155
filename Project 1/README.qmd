@@ -77,6 +77,8 @@ format: pdf
 
 **Awards** - Awards won that season
 
+**Player-additional** - Player ID
+
 ## Source
 
 Baseball Reference - <https://www.baseball-reference.com/>
