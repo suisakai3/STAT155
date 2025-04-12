@@ -1,33 +1,35 @@
 ---
 title: "README"
-format: pdf
+format: html
 ---
 
-## Dimensions
+## Question
 
-34 columns x 1100 to 1300 rows
+Can we predict a player's performance/worth in an upcoming season based on their previous performance stats and other metrics?
 
-## Dictionary
+Baseball has always been a game of numbers. However, with the rise of technology, the methods of how we obtain those numbersr has been evolving fast. Analyzing data and predicting a player's performances in the future is a crucial step for a team in their roster management. In this project, I will attempt to predict a given player's worth in an upcoming season given their past performances and age, among other factors.
 
-**Rank** - Index; irrelevant
+## Data Dimensions
 
-**Player** - Name of player; \* denotes left-handed, \# denotes switch hitter
+*Statcast* 45 columns x 2492 rows (players with 300+ plate appearances in any given season from 2015-2024 except 2020) + 142 rows (qualified hitters from shortened 2020 season)
+
+*Baseball Reference* 34 columns x 1100 - 1300 rows x 10 years (2015-2024)
+
+We will merge the Baseball Reference dataset onto the Statcast dataset, deleting any entries that don't appear in Statcast. We will only keep the WAR, Runs, OPS+, rOBA, and Rbat+ columns from Baseball Reference.
+
+## Data Dictionary
+
+**Rk.** - Index; irrelevant
+
+**Player** - Name of player
+
+**Year** - Season year
 
 **Age** - Age of player
 
-**Team** - Name of team played for (if multiple, listed as "{x}TM" where x is the number of teams played for)
-
-**Lg** - League; AL/NL
-
-**WAR** - Wins Above Replacement
-
-**G** - Games played
-
-**PA** - Plate Appearances
-
 **AB** - At-Bats
 
-**R** - Runs
+**PA** - Plate Appearances
 
 **H** - Hits
 
@@ -37,23 +39,77 @@ format: pdf
 
 **HR** - Home Runs
 
-**RBI** - Runs Batted In
-
-**SB** - Stolen Bases
-
-**CS** - Caught Stealing
+**SO** - Strikeouts
 
 **BB** - Base on Balls/Walks
 
-**SO** - Strikeouts
+**K%** - Strikeout percentage
 
-**BA** - Batting Average (Hits/At Bats)
+**BB%** - Base on Balls percentage
 
-**OBP** - On-Base Percentage (H + BB + HBP)/(At Bats + BB + HBP + SF)
+**AVG** – Batting average (Hits / At-Bat)
 
 **SLG** - Slugging (1B + 2\*2B + 3\*3B + 4\*HR/At Bats)
 
+**OBP** - On-Base Percentage (H + BB + HBP)/(At Bats + BB + HBP + SF)
+
 **OPS** - On-Base + Slugging Percentage
+
+**ISO** - Isolated Power (ability to hit for extra-base hits)
+
+**BABIP** - Batting average on balls in play
+
+**RBI** - Runs Batted In
+
+**G** - Games played
+
+**HBP** - Hit By Pitch
+
+**xBA** - Expected batting average
+
+**xSLG** - Expected slugging percentage
+
+**wOBA** - Weighted on-base average
+
+**xwOBA** - Expected weighted on-base average
+
+**xOBP** - Expected on-base percentage
+
+**xISO** - Expected isolated power
+
+**wOBACON** - Weighted on-base average on contact
+
+**xwOBACON** - Expected weighted on-base average on contact
+
+**BACON** - Batting average on contact
+
+**xBACON** - Expected batting average on contact
+
+**BA - xBA** - Real batting average - expected batting average
+
+**SLG - xSLG** - Real slugging percentage - expected slugging percentage
+
+**wOBA - xwOBA** - Real weighted on-base average - expected weighted on-base percentage
+
+**Fast Swing %** - 75 mph or higher bat speed
+
+**LA Sweet-Spot %** - Launch angle between 8 and 32 degrees
+
+**Barrel%** - The batted ball has an expected .500 batting average and 1.500 slugging percentage
+
+**Hard Hit %** - Exit velocity of 95 mph or higher
+
+**EV50** - Average of the hardest 50% of batted balls
+
+**Adjusted EV** - Averages maximum(88, actual exit velocity)
+
+**Whiff %** - Number of pitches swung at and missed / total number of swings
+
+**Swing %** - Percentage of pitches a batter swings at
+
+**WAR** - Wins Above Replacement
+
+**R** - Runs
 
 **OPS+** - 100\*\[OBP/league OBP + SLG/league SLG - 1\], OPS adjusted to player's ballpark
 
@@ -61,26 +117,18 @@ format: pdf
 
 **Rbat+** - Batting runs as computed for WAR, but indexed to the environment the player played in, where 100 is league average
 
-**TB** - Total Bases (1B + 2\*2B + 3\*3B + 4\*HR)
-
-**GIDP** - Double Plays Grounded Into; only tracks standard double plays
-
-**HBP** - Hit By Pitch
-
-**SH** - Sacrifice Hits (Sacrifice Bunts)
-
-**SF** - Sacrifice Flies
-
-**IBB** - Intentional Bases on Balls
-
-**Pos** - Position(s) Played
-
-**Awards** - Awards won that season
-
-**Player-additional** - Player ID
-
 ## Source
 
-Baseball Reference - <https://www.baseball-reference.com/>
+Statcast - [https://baseballsavant.mlb.com/https://baseballsavant.mlb.com/](https://baseballsavant.mlb.com/)
 
-Data collected from all MLB games in 2000 - 2024
+Baseball Reference - <https://stathead.com/baseball/>
+
+Data collected from all MLB games in 2015 - 2024 (Statcast era)
+
+## Glimpse
+
+```{r}
+library(tidyverse)
+data <- read_csv("/Users/suisakai/STAT155/Project 1/Data/Statcast.csv")
+glimpse(data)
+```
