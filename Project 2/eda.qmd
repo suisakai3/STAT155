@@ -145,3 +145,5 @@ plt.close()
 ```
 
 We can see that for every plot most of the data points are clustered in a small area, with a few data points around that cluster. We can also see that the plots we expect to see positive correlation in such as WAR vs xBA, OPS vs BB%, etc. are indeed somewhat positively correlated while there are others that do not seem too correlated.
+
+The resulting png files are in Project 1 -> Data
