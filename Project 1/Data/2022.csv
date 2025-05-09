@@ -2,7 +2,7 @@
 
 
  
-Rk,Player▲,Age,Team,Lg,WAR,G,PA,AB,R,H,2B,3B,HR,RBI,SB,CS,BB,SO,BA,OBP,SLG,OPS,OPS+,rOBA,Rbat+,TB,GIDP,HBP,SH,SF,IBB,Pos,Awards,Player▲-additional
+Rk,Player,Age,Team,Lg,WAR,G,PA,AB,R,H,2B,3B,HR,RBI,SB,CS,BB,SO,BA,OBP,SLG,OPS,OPS+,rOBA,Rbat+,TB,GIDP,HBP,SH,SF,IBB,Pos,Awards,Player▲-additional
 1,CJ Abrams*,21,2TM,NL,0.1,90,302,284,33,70,12,2,2,21,7,4,5,50,.246,.280,.324,.604,75,.272,74,92,5,9,2,2,0,64/H9D,,abramcj01
 2,Albert Abreu,26,KCR,AL,0.0,1,0,0,0,0,0,0,0,0,0,0,0,0,,,,,,,,0,0,0,0,0,0,/1,,abreual01
 3,José Abreu,35,CHW,AL,4.3,157,679,601,85,183,40,0,15,75,0,0,62,110,.304,.378,.446,.824,134,.368,138,268,19,12,0,4,2,*3D,MVP-17,abreujo02

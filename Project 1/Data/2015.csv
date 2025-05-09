@@ -2,7 +2,7 @@
 
 
  
-Rk,Player▲,Age,Team,Lg,WAR,G,PA,AB,R,H,2B,3B,HR,RBI,SB,CS,BB,SO,BA,OBP,SLG,OPS,OPS+,rOBA,Rbat+,TB,GIDP,HBP,SH,SF,IBB,Pos,Awards,Player▲-additional
+Rk,Player,Age,Team,Lg,WAR,G,PA,AB,R,H,2B,3B,HR,RBI,SB,CS,BB,SO,BA,OBP,SLG,OPS,OPS+,rOBA,Rbat+,TB,GIDP,HBP,SH,SF,IBB,Pos,Awards,Player▲-additional
 1,David Aardsma,33,ATL,NL,0.0,30,1,1,0,0,0,0,0,0,0,0,0,1,.000,.000,.000,.000,-100,.000,-136,0,0,0,0,0,0,1,,aardsda01
 2,Fernando Abad*,29,OAK,AL,0.0,4,0,0,0,0,0,0,0,0,0,0,0,0,,,,,,,,0,0,0,0,0,0,1,,abadfe01
 3,José Abreu,28,CHW,AL,3.4,154,668,613,88,178,34,3,30,101,0,0,39,140,.290,.347,.502,.850,135,.366,135,308,16,15,0,1,11,*3D,MVP-21,abreujo02

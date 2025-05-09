@@ -2,7 +2,7 @@
 
 
  
-Rk,Player▲,Age,Team,Lg,WAR,G,PA,AB,R,H,2B,3B,HR,RBI,SB,CS,BB,SO,BA,OBP,SLG,OPS,OPS+,rOBA,Rbat+,TB,GIDP,HBP,SH,SF,IBB,Pos,Awards,Player▲-additional
+Rk,Player,Age,Team,Lg,WAR,G,PA,AB,R,H,2B,3B,HR,RBI,SB,CS,BB,SO,BA,OBP,SLG,OPS,OPS+,rOBA,Rbat+,TB,GIDP,HBP,SH,SF,IBB,Pos,Awards,Player▲-additional
 1,Fernando Abad*,35,BAL,AL,0.0,2,0,0,0,0,0,0,0,0,0,0,0,0,,,,,,,,0,0,0,0,0,0,1,,abadfe01
 2,Cory Abbott,25,CHC,NL,0.0,8,3,3,0,1,0,0,0,0,0,0,0,1,.333,.333,.333,.667,82,.267,57,1,0,0,0,0,0,/1H,,abbotco01
 3,Albert Abreu,25,NYY,AL,0.0,3,0,0,0,0,0,0,0,0,0,0,0,0,,,,,,,,0,0,0,0,0,0,1,,abreual01
