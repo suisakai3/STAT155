@@ -13,9 +13,9 @@ def concat_statcast(input1, input2, output):
   except:
     print("file not found error")
 
-input1 = "Statcast.csv"
-input2 = "Statcast_2020.csv"
-output = "Complete_Statcast.csv"
+input1 = "../Project1/Data/Statcast.csv"
+input2 = "../Project1/Data/Statcast_2020.csv"
+output = "../Project1/Data/Complete_Statcast.csv"
 concat_statcast(input1, input2, output)
 
 def merge_data(input3, input4, output, columns):
@@ -37,9 +37,9 @@ def merge_data(input3, input4, output, columns):
   except FileNotFoundError:
     print("file not found error")
 
-input3 = 'Complete_Statcast.csv'
+input3 = '../Project1/Data/Complete_Statcast.csv'
 input4 = range(2015, 2025)
 columns = ['WAR', 'R', 'OPS+', 'rOBA', 'Rbat+']
-output = "Complete_Data.csv"
+output = "../Project1/Data/Complete_Data.csv"
 merge_data(input3, input4, output, columns)
-data = pd.read_csv(output)  
+data = pd.read_csv(output)
