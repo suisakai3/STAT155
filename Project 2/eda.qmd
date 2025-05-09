@@ -1,6 +1,6 @@
 ---
 title: "eda"
-format: html
+format: md
 ---
 
 ## Objective
@@ -39,9 +39,9 @@ def concat_statcast(input1, input2, output):
 Read the two files and concat them together.
 
 ```{python}
-input1 = "Statcast.csv"
-input2 = "Statcast_2020.csv"
-output = "Complete_Statcast.csv"
+input1 = "../Project1/Data/Statcast.csv"
+input2 = "../Project1/Data/Statcast_2020.csv"
+output = "../Project1/Data/Complete_Statcast.csv"
 concat_statcast(input1, input2, output)
 ```
 
@@ -71,10 +71,10 @@ def merge_data(input3, input4, output, columns):
 Read the Baseball Reference files and merge.
 
 ```{python}
-input3 = 'Complete_Statcast.csv'
+input3 = '../Project1/Data/Complete_Statcast.csv'
 input4 = range(2015, 2025)
 columns = ['WAR', 'R', 'OPS+', 'rOBA', 'Rbat+']
-output = "Complete_Data.csv"
+output = "../Project1/Data/Complete_Data.csv"
 merge_data(input3, input4, output, columns)
 complete_dataset = pd.read_csv(output)
 ```
@@ -146,4 +146,4 @@ plt.close()
 
 We can see that for every plot most of the data points are clustered in a small area, with a few data points around that cluster. We can also see that the plots we expect to see positive correlation in such as WAR vs xBA, OPS vs BB%, etc. are indeed somewhat positively correlated while there are others that do not seem too correlated.
 
-The resulting png files are in Project 1 -> Data
+The resulting png files are in Project 1 -> Data.
