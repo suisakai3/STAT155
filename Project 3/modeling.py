@@ -222,9 +222,9 @@ def rf_predict_multiple_stats_2025(input_csv, targets, key_columns,
     return merged_pred_df, full_eval_df
 
 
-input = "../Project1/Data/Complete_Data.csv"
-output1 = "../Project1/Data/Predictions_rnn.csv"
-output2 = "../Project1/Data/Predictions_rf.csv"
+input = "../Project 1/Data/Complete_Data.csv"
+output1 = "../Project 1/Data/Predictions_rnn.csv"
+output2 = "../Project 1/Data/Predictions_rf.csv"
 key_columns = ['xba', 'barrel_batted_rate', 'player_age', 'batting_avg', 'k_percent', 'bb_percent', 'on_base_plus_slg', 'Rbat+']
 target = "WAR"
 target_stats = ['WAR', 'home_run', 'OPS+']
@@ -239,7 +239,7 @@ pred_2025_df, eval_df = rf_predict_multiple_stats_2025(
     input_csv=input,
     targets=target_stats,
     key_columns=key_columns,
-    eval_output_csv='../Project1/Data/Eval_MultiStats.csv',
-    predict_2025_csv='../Project1/Data/Predictions_2025_Multi.csv'
+    eval_output_csv='../Project 1/Data/Eval_MultiStats.csv',
+    predict_2025_csv='../Project 1/Data/Predictions_2025_Multi.csv'
 )
 print(pred_2025_df.head())

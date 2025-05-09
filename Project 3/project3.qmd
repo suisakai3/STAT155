@@ -212,8 +212,8 @@ def rnn_prediction(input, output, target, key_cols, sequence_length):
     return model, test_df, rmse, r2
   
 # Run the code
-input = "../Project1/Data/Complete_Data.csv"
-output1 = "../Project1/Data/Predictions_rnn.csv"
+input = "../Project 1/Data/Complete_Data.csv"
+output1 = "../Project 1/Data/Predictions_rnn.csv"
 # we take the most important stats
 key_columns = ['xba', 'barrel_batted_rate', 'player_age', 'batting_avg', 'k_percent', 'bb_percent', 'on_base_plus_slg', 'Rbat+'] 
 # we will predict a player's WAR (wins above replacement)
@@ -271,7 +271,7 @@ def rf_prediction(input, output, target, key_columns):
     return model, df_pred, rmse, r2
 
 # Run the code 
-output2 = "../Project1/Data/Predictions_rf.csv"
+output2 = "../Project 1/Data/Predictions_rf.csv"
 model, predictions, rmse, r2 = rf_prediction(input, output2, target, key_columns)
 print(f"RMSE: {rmse:.3f}")
 print(f"R²: {r2:.3f}")
