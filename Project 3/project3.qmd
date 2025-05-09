@@ -1,6 +1,6 @@
 ---
 title: "project3"
-format: md
+format: html
 ---
 
 ## Objective
@@ -31,9 +31,9 @@ def concat_statcast(input1, input2, output):
   except:
     print("file not found error")
     
-input1 = "Statcast.csv"
-input2 = "Statcast_2020.csv"
-output = "Complete_Statcast.csv"
+input1 = "../Project1/Data/Statcast.csv"
+input2 = "../Project1/Data/Statcast_2020.csv"
+output = "../Project1/Data/Complete_Statcast.csv"
 concat_statcast(input1, input2, output)
 
 def merge_data(input3, input4, output, columns):
@@ -55,10 +55,10 @@ def merge_data(input3, input4, output, columns):
   except FileNotFoundError:
     print("file not found error")
     
-input3 = 'Complete_Statcast.csv'
+input3 = '../Project1/Data/Complete_Statcast.csv'
 input4 = range(2015, 2025)
 columns = ['WAR', 'R', 'OPS+', 'rOBA', 'Rbat+']
-output = "Complete_Data.csv"
+output = "../Project1/Data/Complete_Data.csv"
 merge_data(input3, input4, output, columns)
 complete_dataset = pd.read_csv(output)
 
@@ -212,8 +212,8 @@ def rnn_prediction(input, output, target, key_cols, sequence_length):
     return model, test_df, rmse, r2
   
 # Run the code
-input = "Complete_Data.csv"
-output1 = "Predictions_rnn.csv"
+input = "../Project1/Data/Complete_Data.csv"
+output1 = "../Project1/Data/Predictions_rnn.csv"
 # we take the most important stats
 key_columns = ['xba', 'barrel_batted_rate', 'player_age', 'batting_avg', 'k_percent', 'bb_percent', 'on_base_plus_slg', 'Rbat+'] 
 # we will predict a player's WAR (wins above replacement)
@@ -227,48 +227,54 @@ print(f"R^2: {r2:.3f}")
 We get a RMSE of around 1.7 and r^2 of around 0.25. These are not the best numbers but considering that a player's WAR can be very unpredictable it is not the worst either. However, I wanted a better model so I asked AI what the best model for this situation would be and it told me Random Forests. So we will also implement a random forest and compare with LSTM.
 
 ```{python}
-def rf_prediction(input, output, target, key_cols):
-    # Load and sort data
-    df = pd.read_csv(input_path).sort_values(['Player', 'year']).reset_index(drop=True)
+def rf_prediction(input, output, target, key_columns):
+    df = pd.read_csv(input).copy()
+    
+    if target not in df.columns:
+        raise ValueError(f"{target} column not found in data")
+    
+    df = df.sort_values(['Player', 'year']).reset_index(drop=True)
 
-    if target_col not in df.columns:
-        raise ValueError(f"Target column '{target}' not found in the dataset.")
+    # Lag features
+    df['WAR_lag1'] = df.groupby('Player')[target].shift(1)
+    df['WAR_lag2'] = df.groupby('Player')[target].shift(2)
+    df['WAR_lag3'] = df.groupby('Player')[target].shift(3)
 
-    # Add lagged versions of the target. Lagged versions are the previous years' WAR values
-    df['lag1'] = df.groupby('Player')[target].shift(1)
-    df['lag2'] = df.groupby('Player')[target].shift(2)
-    df['lag3'] = df.groupby('Player')[target].shift(3)
+    used_cols = key_columns + ['WAR_lag1', 'WAR_lag2', 'WAR_lag3']
+    df = df[['Player', 'year', target] + used_cols].dropna().reset_index(drop=True)
 
-    X = df[all_features]
+    X = df[used_cols]
     y = df[target]
 
-    # Scale input features
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
-    # Preserve indices for labeling predictions later
-    df['row_idx'] = df.index
+    # Important: save full index to reconstruct predictions
+    df['index_in_df'] = df.index
+
     X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split(
-        X_scaled, y, df['row_idx'], test_size=0.2
+        X_scaled, y, df['index_in_df'], test_size=0.2
     )
 
-    # Train the random forest model
     model = RandomForestRegressor(n_estimators=200, max_depth=10)
     model.fit(X_train, y_train)
 
-    # Predict on test set
     y_pred = model.predict(X_test)
 
-    # Evaluate performance
     rmse = np.sqrt(mean_squared_error(y_test, y_pred))
     r2 = r2_score(y_test, y_pred)
 
-    # Create prediction DataFrame
-    predictions = df.loc[idx_test].copy()
-    predictions[f'Predicted_{target_col}'] = y_pred
-    predictions.to_csv(output_path, index=False)
+    df_pred = df.loc[idx_test].copy()
+    df_pred['Predicted_WAR'] = y_pred
+    df_pred.to_csv(output, index=False)
 
-    return model, predictions, rmse, r2
+    return model, df_pred, rmse, r2
+
+# Run the code 
+output2 = "../Project1/Data/Predictions_rf.csv"
+model, predictions, rmse, r2 = rf_prediction(input, output2, target, key_columns)
+print(f"RMSE: {rmse:.3f}")
+print(f"R²: {r2:.3f}")
 ```
 
 We get a RMSE of around 1.3 and r^2 of around 0.5. These numbers are significantly better than the previous 1.7 and 0.25 of the LSTM, suggesting that Random Forest is the better model for this project than RNN/LSTM. 1.3 is still fairly high considering that WAR is usually within the range [-2, 10] but with how real world sports can be, 1.3 is not a bad error. 
