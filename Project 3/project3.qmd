@@ -124,6 +124,22 @@ The resulting png files are in Project 1 -> Data.
 
 We will be using Recurrent Neural Networks as our main model. Before we start modeling, however, we must clean the data so we have sequences of seasons for each player. 
 
+Import necessary packages
+
+```{python}
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Dropout
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks import ReduceLROnPlateau
+import tensorflow as tf
+```
+
+Create the model.
+
 ```{python}
 def rnn_prediction(input, output, target, key_cols, sequence_length):
   # Sort by Player and Season
