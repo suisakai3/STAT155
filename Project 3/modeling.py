@@ -10,76 +10,93 @@ from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 import tensorflow as tf
 
-def rnn_prediction(input, output, target, key_cols, sequence_length):
-    # Load and sort data
-    df = pd.read_csv(input)
-    df = df.sort_values(['Player', 'year'])
-
-    # Get index of only players with enough seasons because LSTM requires a sequence of seasons
-    player_season_counts = df.groupby('Player')['year'].nunique()
-    eligible_players = player_season_counts[player_season_counts > sequence_length].index
-
-    # Generate sequential training samples
-    X, y, metadata = [], [], []
-
-    for player in eligible_players:
-        player_data = df[df['Player'] == player]
-        feature_data = player_data[key_cols].copy().reset_index(drop=True)
-        target_series = player_data[target].reset_index(drop=True)
-        year_series = player_data['year'].reset_index(drop=True)
-
-        for i in range(len(feature_data) - sequence_length):
-            seq = feature_data.iloc[i:i + sequence_length].values
-            if seq.shape != (sequence_length, len(key_cols)):
+def rnn_prediction(input, output, target, key_columns, sequence_length):
+    # Load data
+    df = pd.read_csv(input).reset_index(drop=True)
+    
+    # Select only required columns
+    required_cols = ['Player', 'year', target] + key_columns    
+    df = df[required_cols].copy()
+    
+    # Sort by Player and Season
+    df = df.sort_values(['Player', 'year'], ascending=[True, True])
+    
+    # Impute missing values
+    for col in key_columns + [target]:
+        df[col] = df.groupby('Player')[col].transform(lambda x: x.fillna(x.mean()))
+        df[col] = df[col].fillna(df[col].mean())
+        df[col] = df.groupby('Player')[col].transform(lambda x: x.fillna(method='ffill').fillna(method='bfill'))
+        df[col] = df[col].fillna(df[col].mean())
+    
+    # Drop remaining NaNs
+    df = df.dropna()
+    
+    # Filter players with >3 seasons
+    season_counts = df.groupby('Player')['year'].nunique()
+    valid_players = season_counts[season_counts > sequence_length].index
+    
+    # Create sequences
+    X, y, player_years = [], [], []
+    for player in valid_players:
+        player_df = df[df['Player'] == player].loc[:, key_columns].copy()
+        seasons = len(player_df)
+        for i in range(seasons - sequence_length):
+            seq = player_df.iloc[i:i+sequence_length].values
+            if seq.shape != (sequence_length, 8):
                 continue
             X.append(seq)
-            y.append(target_series[i + sequence_length])
-            metadata.append((player, year_series[i + sequence_length]))
-
+            y.append(df[df['Player'] == player][target].iloc[i+sequence_length])
+            player_years.append((player, df[df['Player'] == player]['year'].iloc[i+sequence_length]))
+    
+    if not X:
+        raise ValueError(f"No valid sequences created with sequence_length=3. Found {len(valid_players)} players with >3 seasons.")
+    
     X = np.array(X)
     y = np.array(y)
-
-    # Normalize the features and the target 
+    
+    # Scale features and target
     scaler_X = StandardScaler()
     scaler_y = StandardScaler()
-
-    X_flat = X.reshape(-1, X.shape[2])
-    X_scaled = scaler_X.fit_transform(X_flat).reshape(X.shape)
+    X_reshaped = X.reshape(-1, 8)
+    X_scaled = scaler_X.fit_transform(X_reshaped).reshape(X.shape)
     y_scaled = scaler_y.fit_transform(y.reshape(-1, 1)).flatten()
-
-    # Split into training and test sets
-    split_idx = int(0.8 * len(X_scaled))
-    X_train, X_test = X_scaled[:split_idx], X_scaled[split_idx:]
-    y_train, y_test = y_scaled[:split_idx], y_scaled[split_idx:]
-    test_metadata = metadata[split_idx:]
-
-    # Build and train the LSTM model
+    
+    # Split data
+    train_idx = int(0.8 * len(X))
+    X_train, X_test = X_scaled[:train_idx], X_scaled[train_idx:]
+    y_train, y_test = y_scaled[:train_idx], y_scaled[train_idx:]
+    test_player_years = player_years[train_idx:]
+    
+    # Build RNN model
     model = Sequential([
-        LSTM(50, input_shape=(sequence_length, X.shape[2])),
+        LSTM(50, input_shape=(3, 8), return_sequences=False),
         Dense(25, activation='relu'),
         Dense(1)
     ])
     model.compile(optimizer='adam', loss='mse')
-    model.fit(X_train, y_train, epochs=50, batch_size=32, validation_split=0.2, verbose=0)
-
-    # Predict and evaluate
+    
+    # Train model
+    model.fit(X_train, y_train, epochs=50, batch_size=32, verbose=0, validation_split=0.2)
+    
+    # Predict
     y_pred_scaled = model.predict(X_test)
     y_pred = scaler_y.inverse_transform(y_pred_scaled).flatten()
     y_test_orig = scaler_y.inverse_transform(y_test.reshape(-1, 1)).flatten()
-
+    
+    # Evaluate
     rmse = np.sqrt(mean_squared_error(y_test_orig, y_pred))
     r2 = r2_score(y_test_orig, y_pred)
-
+    
     # Save predictions
-    results_df = pd.DataFrame({
-        'Player': [p for p, _ in test_metadata],
-        'Year': [y for _, y in test_metadata],
-        'Actual_' + target: y_test_orig,
-        'Predicted_' + target: y_pred
+    test_df = pd.DataFrame({
+        'Player': [py[0] for py in test_player_years],
+        'Year': [py[1] for py in test_player_years],
+        'Actual_WAR': y_test_orig,
+        'Predicted_WAR': y_pred
     })
-    results_df.to_csv(output, index=False)
-
-    return model, results_df, rmse, r2
+    test_df.to_csv(output, index=False)
+    
+    return model, test_df, rmse, r2
 
 def rf_prediction(input, output, target, key_columns):
     df = pd.read_csv(input).copy()
@@ -229,9 +246,9 @@ key_columns = ['xba', 'barrel_batted_rate', 'player_age', 'batting_avg', 'k_perc
 target = "WAR"
 target_stats = ['WAR', 'home_run', 'OPS+']
 sequence_length = 3
-#model, df, rmse, r2 = rnn_prediction(input, output1, target, key_columns, sequence_length)
-#print(f"RMSE: {rmse:.3f}")
-#print(f"R²: {r2:.3f}")
+model, df, rmse, r2 = rnn_prediction(input, output1, target, key_columns, sequence_length)
+print(f"RMSE: {rmse:.3f}")
+print(f"R²: {r2:.3f}")
 model, predictions, rmse, r2 = rf_prediction(input, output2, target, key_columns)
 print(f"RMSE: {rmse:.3f}")
 print(f"R²: {r2:.3f}")

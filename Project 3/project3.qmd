@@ -141,30 +141,46 @@ import tensorflow as tf
 Create the model.
 
 ```{python}
-def rnn_prediction(input, output, target, key_cols, sequence_length):
-  # Sort by Player and Season
-  complete_dataset = complete_dataset.sort_values(['Player', 'year'], ascending=[True, True])
-  # Filter players with >3 seasons because we need a sequence of seasons from each single player
-  season_counts = complete_dataset.groupby('Player')['year'].nunique()
-  valid_players = season_counts[season_counts > sequence_length].index
-  # Create sequences
-  X = []
-  y = []
-  player_years = []
-  
-  for player in valid_players:
-      player_data = df[df['Player'] == player]
-      feature_data = player_data[key_cols].values
-      target_data = player_data[target].values
-      years = player_data['year'].values
-  
-      for i in range(len(feature_data) - sequence_length):
-          sequence = feature_data[i:i + sequence_length]
-          if sequence.shape != (sequence_length, 8):
-              continue
-          X.append(sequence)
-          y.append(target_data[i + sequence_length])
-          player_years.append((player, years[i + sequence_length]))
+def rnn_prediction(input, output, target, key_columns, sequence_length):
+    # Load data
+    df = pd.read_csv(input).reset_index(drop=True)
+    
+    # Select only required columns
+    required_cols = ['Player', 'year', target] + key_columns    
+    df = df[required_cols].copy()
+    
+    # Sort by Player and Season
+    df = df.sort_values(['Player', 'year'], ascending=[True, True])
+    
+    # Impute missing values
+    for col in key_columns + [target]:
+        df[col] = df.groupby('Player')[col].transform(lambda x: x.fillna(x.mean()))
+        df[col] = df[col].fillna(df[col].mean())
+        df[col] = df.groupby('Player')[col].transform(lambda x: x.fillna(method='ffill').fillna(method='bfill'))
+        df[col] = df[col].fillna(df[col].mean())
+    
+    # Drop remaining NaNs
+    df = df.dropna()
+    
+    # Filter players with >3 seasons
+    season_counts = df.groupby('Player')['year'].nunique()
+    valid_players = season_counts[season_counts > sequence_length].index
+    
+    # Create sequences
+    X, y, player_years = [], [], []
+    for player in valid_players:
+        player_df = df[df['Player'] == player].loc[:, key_columns].copy()
+        seasons = len(player_df)
+        for i in range(seasons - sequence_length):
+            seq = player_df.iloc[i:i+sequence_length].values
+            if seq.shape != (sequence_length, 8):
+                continue
+            X.append(seq)
+            y.append(df[df['Player'] == player][target].iloc[i+sequence_length])
+            player_years.append((player, df[df['Player'] == player]['year'].iloc[i+sequence_length]))
+    
+    if not X:
+        raise ValueError(f"No valid sequences created with sequence_length=3. Found {len(valid_players)} players with >3 seasons.")
     
     X = np.array(X)
     y = np.array(y)
@@ -176,16 +192,18 @@ def rnn_prediction(input, output, target, key_cols, sequence_length):
     X_scaled = scaler_X.fit_transform(X_reshaped).reshape(X.shape)
     y_scaled = scaler_y.fit_transform(y.reshape(-1, 1)).flatten()
     
-    # Split data to train and test data
+    # Split data
     train_idx = int(0.8 * len(X))
     X_train, X_test = X_scaled[:train_idx], X_scaled[train_idx:]
     y_train, y_test = y_scaled[:train_idx], y_scaled[train_idx:]
     test_player_years = player_years[train_idx:]
     
-    # RNN model (Long Short-Term Memory, LSTM)
-    model = Sequential([LSTM(50, input_shape=(sequence_length, 8), return_sequences=False),
-                        Dense(25, activation='relu'), Dense(1)
-                       ])
+    # Build RNN model
+    model = Sequential([
+        LSTM(50, input_shape=(3, 8), return_sequences=False),
+        Dense(25, activation='relu'),
+        Dense(1)
+    ])
     model.compile(optimizer='adam', loss='mse')
     
     # Train model
@@ -196,7 +214,7 @@ def rnn_prediction(input, output, target, key_cols, sequence_length):
     y_pred = scaler_y.inverse_transform(y_pred_scaled).flatten()
     y_test_orig = scaler_y.inverse_transform(y_test.reshape(-1, 1)).flatten()
     
-    # Evaluate RMSE and r^2
+    # Evaluate
     rmse = np.sqrt(mean_squared_error(y_test_orig, y_pred))
     r2 = r2_score(y_test_orig, y_pred)
     
