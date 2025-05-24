@@ -1,21 +1,29 @@
----
-title: "Project 4"
-format: md
----
+# Project 4
+
 
 # Monte Carlo Simulation: LSTM, Random Forest, and Linear Regression
 
 ## Objective
 
-This Monte Carlo simulation compares the performance of three regression models: - Linear Regression - Ridge Regression - Random Forest in predicting WAR, using 30 synthetic datasets (10 per correlation level: 0.0, 0.5, 0.99). The models will be evaluated on Mean Squared Error (MSE). The results will be summarized using the mean and standard deviation of the MSE for each combination of model and correlation structure.
+This Monte Carlo simulation compares the performance of three regression
+models: - Linear Regression - Ridge Regression - Random Forest in
+predicting WAR, using 30 synthetic datasets (10 per correlation level:
+0.0, 0.5, 0.99). The models will be evaluated on Mean Squared Error
+(MSE). The results will be summarized using the mean and standard
+deviation of the MSE for each combination of model and correlation
+structure.
 
-**Question**: How do Linear Regression, Random Forest, and Ridge Regression perform in predicting a baseball player’s WAR under varying levels of predictor correlation (none, mild, high)?
+**Question**: How do Linear Regression, Random Forest, and Ridge
+Regression perform in predicting a baseball player’s WAR under varying
+levels of predictor correlation (none, mild, high)?
 
-Note: We removed the LSTM model because of time concerns (that one takes very long to run) and because Random Forest outperformed it quite significantly anyways.
+Note: We removed the LSTM model because of time concerns (that one takes
+very long to run) and because Random Forest outperformed it quite
+significantly anyways.
 
 ## Setup
 
-```{python}
+``` python
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
@@ -35,7 +43,7 @@ np.random.seed(116)
 
 We will use the mean and standard deviations of the actual data.
 
-```{python}
+``` python
 complete_dataset = pd.read_csv("../Project 1/Data/Complete_Data.csv")
 key_columns = ['xba', 'barrel_batted_rate', 'player_age', 'WAR', 'k_percent', 'bb_percent', 'on_base_plus_slg', 'Rbat+', 'batting_avg']
 complete_dataset[key_columns].describe()
@@ -123,25 +131,32 @@ def generate_data(n=100, correlation=0.0): # we set default n to be 100
     return df
 ```
 
-**Feature Ranges**: Using the mean and standard deviations of the key columns of the complete dataset using complete_dataset.describe().
+**Feature Ranges**: Using the mean and standard deviations of the key
+columns of the complete dataset using complete_dataset.describe().
 
-**Correlation**: Pairwise correlations (0.0, 0.5, 0.99) applied to all predictors.
+**Correlation**: Pairwise correlations (0.0, 0.5, 0.99) applied to all
+predictors.
 
-**WAR Generation**: Coefficients reflect realistic contributions (e.g., strong AR_lag1). Noise mimics real-world variability (e.g., 2020 season).
+**WAR Generation**: Coefficients reflect realistic contributions (e.g.,
+strong AR_lag1). Noise mimics real-world variability (e.g., 2020
+season).
 
 WAR = Sum(βX + c), where
 
-coefficient matrix β = \[0.1, 0.1, −0.1, 0.1, −0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1\]
+coefficient matrix β = \[0.1, 0.1, −0.1, 0.1, −0.1, 0.1, 0.1, 0.1, 0.1,
+0.1, 0.1\]
 
-X = Multivariate Normal(mean vector (from dataset.describe(), covariance matrix)
+X = Multivariate Normal(mean vector (from dataset.describe(), covariance
+matrix)
 
 c = noise. follows standard normal distribution
 
 ## Simulation Loop
 
-Generate 10 datasets per correlation level, split data (70% train, 30% test), fit models, and compute MSE. Ridge uses parameter alpha=0.1.
+Generate 10 datasets per correlation level, split data (70% train, 30%
+test), fit models, and compute MSE. Ridge uses parameter alpha=0.1.
 
-```{python}
+``` python
 results = []
 correlations = [['No Corr', 0.0], ['Mild Corr', 0.5], ['High Corr', 0.99]]
 models = {
@@ -199,9 +214,10 @@ for label, rho in correlations:
 
 ## Results Summary
 
-Summarize MSE mean and standard deviation for each model-correlation pair. We are evaluating the MSE (mean squared error) and r\^2
+Summarize MSE mean and standard deviation for each model-correlation
+pair. We are evaluating the MSE (mean squared error) and r^2
 
-```{python}
+``` python
 results_df = pd.DataFrame(results)
 
 # Summarize results
@@ -230,21 +246,41 @@ summary_df = pd.DataFrame(summary)
 print(summary_df)
 ```
 
+              Model Correlation  Mean_MSE    SD_MSE   Mean_R2     SD_R2
+    0        Linear     No Corr  1.306118  0.336878  0.833703  0.065836
+    1        Linear   Mild Corr  1.152046  0.227160  0.862205  0.033649
+    2        Linear   High Corr  1.234598  0.406266  0.842628  0.044997
+    3  RandomForest     No Corr  2.554535  1.228775  0.701375  0.088503
+    4  RandomForest   Mild Corr  1.619820  0.409421  0.807488  0.046269
+    5  RandomForest   High Corr  1.391210  0.420326  0.819926  0.057057
+    6         Ridge     No Corr  1.304977  0.335870  0.833885  0.065663
+    7         Ridge   Mild Corr  1.150055  0.224519  0.862439  0.033460
+    8         Ridge   High Corr  1.179741  0.378526  0.849863  0.039144
+
 ## Visualization
 
 Create a boxplot to visualize MSE distributions.
 
-```{python}
+``` python
 plt.figure(figsize=(10, 6))
 sns.boxplot(x='Correlation', y='MSE', hue='Model', data=results_df)
 plt.title('Model MSE by Correlation')
 plt.show()
 ```
 
+![](project4_files/figure-markdown_strict/cell-6-output-1.png)
+
 We can now compare the three models numerically and visually.
 
-1.  Linear Regression obtains its lowest Mean_MSE and SD_MSE values where there is mild correlation (correlation: 0.5).
-2.  Random Forest has the highest MSE values overall but it obtains its lowest values when there is high correlation (correlation: 0.99).
-3.  Ridge Regression has very similar numbers as Linear Regression but performs slightly better than Linear Regression due to its L2 regularization. The gap between ridge and linear becomes larger as there is more correlation.
+1.  Linear Regression obtains its lowest Mean_MSE and SD_MSE values
+    where there is mild correlation (correlation: 0.5).
+2.  Random Forest has the highest MSE values overall but it obtains its
+    lowest values when there is high correlation (correlation: 0.99).
+3.  Ridge Regression has very similar numbers as Linear Regression but
+    performs slightly better than Linear Regression due to its L2
+    regularization. The gap between ridge and linear becomes larger as
+    there is more correlation.
 
-Correlation did not affect the MSE for the two linear regression models as much as it did the Random Forest. All three models performed fairly similarly when there was high correlation.
+Correlation did not affect the MSE for the two linear regression models
+as much as it did the Random Forest. All three models performed fairly
+similarly when there was high correlation.
