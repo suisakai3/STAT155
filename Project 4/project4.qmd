@@ -1,0 +1,185 @@
+---
+title: "project4"
+format: html
+---
+
+# Monte Carlo Simulation: LSTM, Random Forest, and Linear Regression
+
+## Objective
+Compare the performance of LSTM, Random Forest, and Linear Regression in predicting WAR, using 30 synthetic datasets (10 each with no correlation (0.0), mild correlation (0.5), and high correlation (0.99) between predictors). Performance will be evaluated via MSE, summarized by mean and standard deviation, mirroring your reference simulation. Results will be compared to your project’s Random Forest (RMSE ~1.2, MSE ~1.44, R² ~0.6–0.7) and LSTM (RMSE ~1.7, MSE ~2.89, R² ~0.2).
+
+## Setup
+We’ll use Python 3.10 (as required for your tensorflow-based LSTM) with libraries from your project and the original simulation. The data generation will reflect your key columns, lagged WAR features (for Random Forest and Linear Regression), and sequence lengths (for LSTM).
+
+```{python}
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense
+from tensorflow.keras import Input
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+np.random.seed(116)
+```
+
+## Data Generation Function
+We’ll generate synthetic data mimicking your dataset’s statistical properties (based on typical MLB ranges, as your describe() output wasn’t shared). The function includes lagged WAR features and sequences for LSTM, with controlled correlations between predictors.
+
+```{python}
+def generate_data(n=100, correlation=0.0, sequence_length=3):
+    # Define means and stds based on typical MLB data
+    stats = {
+        'xba': (0.250, 0.030),  # Expected batting avg: mean ~0.25, std ~0.03
+        'barrel_batted_rate': (7.0, 2.0),  # Barrel%: mean ~7%, std ~2%
+        'player_age': (28.0, 3.5),  # Age: mean ~28, std ~3.5
+        'batting_avg': (0.250, 0.030),  # Batting avg: mean ~0.25, std ~0.03
+        'k_percent': (20.0, 5.0),  # Strikeout%: mean ~20%, std ~5%
+        'bb_percent': (8.0, 2.5),  # Walk%: mean ~8%, std ~2.5
+        'on_base_plus_slg': (0.750, 0.100),  # OPS: mean ~0.75, std ~0.1
+        'Rbat+': (100, 15),  # Rbat+: mean ~100, std ~15
+        'WAR_lag1': (2.0, 1.5),  # Previous season WAR
+        'WAR_lag2': (2.0, 1.5),  # Two seasons ago WAR
+        'WAR_lag3': (2.0, 1.5)  # Three seasons ago WAR
+    }
+    
+    # Create covariance matrix for predictors
+    features = list(stats.keys())
+    n_features = len(features)
+    cov = np.ones((n_features, n_features)) * correlation
+    np.fill_diagonal(cov, 1)
+    stds = np.array([stats[f][1] for f in features])
+    cov = cov * stds[:, None] * stds[None, :]
+    
+    # Generate correlated features
+    means = [stats[f][0] for f in features]
+    X = np.random.multivariate_normal(means, cov, size=n)
+    df = pd.DataFrame(X, columns=features)
+    
+    # Generate WAR (target) with realistic coefficients
+    noise = np.random.normal(0, 1, size=n)  # Noise for real-world variability
+    coefficients = {
+        'xba': 0.1, 'barrel_batted_rate': 0.05, 'player_age': -0.05,
+        'batting_avg': 0.1, 'k_percent': -0.03, 'bb_percent': 0.04,
+        'on_base_plus_slg': 0.08, 'Rbat+': 0.02,
+        'WAR_lag1': 0.8, 'WAR_lag2': 0.3, 'WAR_lag3': 0.1
+    }
+    y = sum(df[f] * coefficients[f] for f in features) + noise
+    df['WAR'] = y
+    
+    # Create sequences for LSTM
+    X_seq, y_seq = [], []
+    for i in range(n - sequence_length):
+        seq = df[features].iloc[i:i + sequence_length].values
+        if seq.shape == (sequence_length, len(features)):
+            X_seq.append(seq)
+            y_seq.append(df['WAR'].iloc[i + sequence_length])
+    
+    return df, np.array(X_seq), np.array(y_seq)
+```
+
+### Notes:
+
+Feature Ranges: Means and stds are estimated (e.g., xBA ~0.25, Barrel% ~7%). Provide your complete_dataset[key_columns].describe() for precise values.
+
+Correlation: Pairwise correlations (0.0, 0.5, 0.99) are applied to all predictors, including lagged WAR.
+
+Sequences: sequence_length=3 matches your LSTM setup. Returns both a DataFrame (for Random Forest, Linear Regression) and sequences (for LSTM).
+
+WAR Generation: Coefficients reflect realistic contributions (e.g., stronger weight for WAR_lag1). Adjust based on your data insights.
+
+Simulation Loop
+We’ll generate 10 datasets per correlation level, split data (70% train, 30% test), fit the three models, and compute MSE. LSTM uses sequences, while Random Forest and Linear Regression use lagged features.
+
+```{python}
+results = []
+correlations = [("No Corr", 0.0), ("Mild Corr", 0.5), ("High Corr", 0.99)]
+sequence_length = 3
+
+for label, rho in correlations:
+    for i in range(10):
+        # Generate data
+        df, X_seq, y_seq = generate_data(n=100, correlation=rho, sequence_length=sequence_length)
+        
+        # Split data for Random Forest and Linear Regression
+        X = df.drop(columns=['WAR'])
+        y = df['WAR']
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=i)
+        
+        # Split sequences for LSTM
+        train_idx = int(0.7 * len(X_seq))
+        X_seq_train, X_seq_test = X_seq[:train_idx], X_seq[train_idx:]
+        y_seq_train, y_seq_test = y_seq[:train_idx], y_seq[train_idx:]
+        
+        # Scale features
+        scaler = StandardScaler()
+        X_train_scaled = scaler.fit_transform(X_train)
+        X_test_scaled = scaler.transform(X_test)
+        
+        scaler_seq = StandardScaler()
+        X_seq_reshaped = X_seq_train.reshape(-1, X_seq_train.shape[-1])
+        X_seq_train_scaled = scaler_seq.fit_transform(X_seq_reshaped).reshape(X_seq_train.shape)
+        X_seq_test_scaled = scaler_seq.transform(X_seq_test.reshape(-1, X_seq_test.shape[-1])).reshape(X_seq_test.shape)
+        
+        # Models
+        models = {
+            "Linear": LinearRegression(),
+            "RandomForest": RandomForestRegressor(n_estimators=200, max_depth=12),  # Matches your tuned max_depth
+        }
+        
+        # Train and evaluate Linear and Random Forest
+        for model_name, model in models.items():
+            model.fit(X_train_scaled, y_train)
+            y_pred = model.predict(X_test_scaled)
+            mse = mean_squared_error(y_test, y_pred)
+            results.append({
+                'Model': model_name,
+                'Correlation': label,
+                'MSE': mse
+            })
+        
+        # Train and evaluate LSTM
+        lstm_model = Sequential([
+            Input(shape=(sequence_length, X.shape[1])),
+            LSTM(50),
+            Dense(25, activation='relu'),
+            Dense(1)
+        ])
+        lstm_model.compile(optimizer='adam', loss='mse')
+        lstm_model.fit(X_seq_train_scaled, y_seq_train, epochs=50, batch_size=32, verbose=0, validation_split=0.2)
+        y_pred_lstm = lstm_model.predict(X_seq_test_scaled, batch_size=32, verbose=0).flatten()
+        mse_lstm = mean_squared_error(y_seq_test, y_pred_lstm)
+        results.append({
+            'Model': 'LSTM',
+            'Correlation': label,
+            'MSE': mse_lstm
+        })
+```
+
+## Results Summary
+Summarize MSE mean and standard deviation for each model-correlation pair.
+
+```{python}
+results_df = pd.DataFrame(results)
+summary = results_df.groupby(['Model', 'Correlation']).agg(
+    Mean_MSE=('MSE', 'mean'),
+    SD_MSE=('MSE', 'std')
+).reset_index()
+
+print(summary)
+```
+
+## Visualization
+Create a boxplot to visualize MSE distributions, as in the original simulation.
+
+```{python}
+plt.figure(figsize=(10, 6))
+sns.boxplot(data=results_df, x='Correlation', y='MSE', hue='Model')
+plt.title("Model MSE by Predictor Correlation")
+plt.show()
+```
