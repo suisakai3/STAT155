@@ -6,7 +6,7 @@
 Can we predict a player’s performance/worth in an upcoming season based
 on their previous performance stats and other metrics?
 
-### Project 1
+### Project 1 https://github.com/suisakai3/STAT155/tree/13b34ff6b99b4cd5eb07327b61a61e865952aaa4/Project%201
 Data Wrangling
 
 Choose the question to consider for the entire project.
