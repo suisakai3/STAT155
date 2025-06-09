@@ -18,7 +18,7 @@ Exploratory Data Analysis
 
 Univariate, Bivariate, and Multivariate data analysis in eda.qmd
 
-### Project 3
+### Project 3 https://github.com/suisakai3/STAT155/tree/d161906e242c27f19e05d20653bca5025545a3bb/Project%203
 Modeling
 
 LSTM and Random Forest Models. project3.qmd contains all the code and analysis, modeling.py is all the code contained in project3.qmd
