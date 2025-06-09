@@ -13,7 +13,7 @@ Choose the question to consider for the entire project.
 Find data for the project and clean the data to get it ready for modeling.
 Simply run data_wrangling.py to clean the raw data. 
 
-### Project 2
+### Project 2 https://github.com/suisakai3/STAT155/tree/20285bd0d0bde0c3198c90e140c82e52bc89e200/Project%202
 Exploratory Data Analysis
 
 Univariate, Bivariate, and Multivariate data analysis in eda.qmd
