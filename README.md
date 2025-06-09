@@ -31,3 +31,17 @@ LSTM and Random Forest Models
 Monte Carlo Simulation
 
 Data generation, model training, and analysis of each model (Random Forest, Linear and Ridge Regression)
+
+### Python Package List
+- numpy
+- pandas
+- sklearn.linear_model
+- sklearn.linear_model import Ridge
+- sklearn.ensemble
+- sklearn.metrics
+- sklearn.model_selection
+- sklearn.preprocessing
+- seaborn
+- matplotlib.pyplot
+- tensorflow (python version 3.10)
+- scipy.stats
