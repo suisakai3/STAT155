@@ -89,19 +89,18 @@ key_columns = ['xba', 'barrel_batted_rate', 'player_age', 'WAR', 'k_percent', 'b
 
 ```{python}
 # Univariate Analysis
-print(data[key_columns].describe())
+print(complete_dataset[key_columns].describe())
 
 # Histograms
 plt.figure(figsize=(16, 12))
 for i, col in enumerate(key_columns, 1):
     plt.subplot(3, 3, i)
-    sns.histplot(data[col], kde=True, bins=30)
+    sns.histplot(complete_dataset[col], kde=True, bins=30)
     plt.title(f'Distribution of {col}')
     plt.xlabel(col)
     plt.ylabel('Frequency')
 plt.tight_layout()
-plt.savefig('univariate.png')
-plt.close()
+plt.show()
 ```
 
 We can see that most of the data is either centered or skewed left.
@@ -109,28 +108,27 @@ We can see that most of the data is either centered or skewed left.
 ### Bivariate Analysis (Correlation)
 
 ```{python}
-print(data[key_columns].corr())
+print(complete_dataset[key_columns].corr())
 
 plt.figure(figsize=(12, 8))
 # xBA vs WAR
 plt.subplot(2, 2, 1)
-sns.scatterplot(x='xba', y='WAR', data=data)
+sns.scatterplot(x='xba', y='WAR', data=complete_dataset)
 plt.title('xBA vs WAR')
 # Barrel% vs OPS
 plt.subplot(2, 2, 2)
-sns.scatterplot(x='barrel_batted_rate', y='WAR', data=data)
+sns.scatterplot(x='barrel_batted_rate', y='WAR', data=complete_dataset)
 plt.title('Barrel% vs WAR')
 # Age vs WAR
 plt.subplot(2, 2, 3)
-sns.scatterplot(x='player_age', y='WAR', data=data)
+sns.scatterplot(x='player_age', y='WAR', data=complete_dataset)
 plt.title('Player Age vs WAR')
 # K% vs BB%
 plt.subplot(2, 2, 4)
-sns.scatterplot(x='Rbat+', y='WAR', data=data)
+sns.scatterplot(x='Rbat+', y='WAR', data=complete_dataset)
 plt.title('Rbat+ vs WAR')
 plt.tight_layout()
-plt.savefig('bivariate.png')
-plt.close()
+plt.show()
 ```
 
 We can see that xBA vs WAR and Rbat+ vs WAR are somewhat positively correlated but Player Age vs WAR and Barrel% vs WAR are not strongly correlated.
@@ -138,12 +136,11 @@ We can see that xBA vs WAR and Rbat+ vs WAR are somewhat positively correlated b
 ### Multivariate Analysis (Pairplot)
 
 ```{python}
-sns.pairplot(data[key_columns], diag_kind='kde', corner=True)
+sns.pairplot(complete_dataset[key_columns], diag_kind='kde', corner=True)
 plt.suptitle('Pair Plot of Key Variables')
-plt.savefig('multivariate.png')
-plt.close()
+plt.show()
 ```
 
 We can see that for every plot most of the data points are clustered in a small area, with a few data points around that cluster. We can also see that the plots we expect to see positive correlation in such as WAR vs xBA, OPS vs BB%, etc. are indeed somewhat positively correlated while there are others that do not seem too correlated.
 
-The resulting png files are in Project 1 -> Data.
+The resulting png files are in Project 2 -> Plots.
