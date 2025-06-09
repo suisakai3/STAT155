@@ -23,7 +23,7 @@ Modeling
 
 LSTM and Random Forest Models. project3.qmd contains all the code and analysis, modeling.py is all the code contained in project3.qmd
 
-### Project 4
+### Project 4 https://github.com/suisakai3/STAT155/tree/471d476b0cbef43a4cf997bea96db655facac766/Project%204
 Monte Carlo Simulation
 
 Data generation, model training, and analysis of each model (Random Forest, Linear and Ridge Regression).
