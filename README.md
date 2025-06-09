@@ -12,7 +12,7 @@ Data Wrangling
 
 Choose the question to consider for the entire project.
 
-Find data for the project.
+Find data for the project and clean the data to get it ready for modeling.
 
 ### Project 2
 
@@ -29,3 +29,5 @@ LSTM and Random Forest Models
 ### Project 4
 
 Monte Carlo Simulation
+
+Data generation, model training, and analysis of each model (Random Forest, Linear and Ridge Regression)
